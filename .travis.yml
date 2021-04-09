@@ -11,6 +11,7 @@ install:
   - pip install pandas
   - pip install tqdm
   - pip install coverage
+  - pip install scikit-learn
  
 script: 
   - python setup.py test
