@@ -34,7 +34,7 @@ setup(
     
     packages = ['smogn'],
     include_package_data = True,
-    install_requires = ['numpy', 'pandas', 'tqdm'],
+    install_requires = ['numpy', 'pandas', 'tqdm', 'scikit-learn'],
     tests_require = ['nose'],
     test_suite = 'nose.collector'
 )

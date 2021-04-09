@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import random as rd
 from tqdm import tqdm
+from sklearn.metrics.pairwise import euclidean_distances
 
 ## load dependencies - internal
 from smogn.box_plot_stats import box_plot_stats
@@ -159,45 +160,41 @@ def over_sampling(
     ## calculate distance between observations based on data types
     ## store results over null distance matrix of n x n
     dist_matrix = np.ndarray(shape = (n, n))
-    
-    for i in tqdm(range(n), ascii = True, desc = "dist_matrix"):
-        for j in range(n):
-            
-            ## utilize euclidean distance given that 
-            ## data is all numeric / continuous
-            if feat_count_nom == 0:
-                dist_matrix[i][j] = euclidean_dist(
-                    a = data_num.iloc[i],
-                    b = data_num.iloc[j],
-                    d = feat_count_num
-                )
-            
-            ## utilize heom distance given that 
-            ## data contains both numeric / continuous 
-            ## and nominal / categorical
-            if feat_count_nom > 0 and feat_count_num > 0:
-                dist_matrix[i][j] = heom_dist(
-                    
-                    ## numeric inputs
-                    a_num = data_num.iloc[i],
-                    b_num = data_num.iloc[j],
-                    d_num = feat_count_num,
-                    ranges_num = feat_ranges_num,
-                    
-                    ## nominal inputs
-                    a_nom = data_nom.iloc[i],
-                    b_nom = data_nom.iloc[j],
-                    d_nom = feat_count_nom
-                )
-            
-            ## utilize hamming distance given that 
-            ## data is all nominal / categorical
-            if feat_count_num == 0:
-                dist_matrix[i][j] = overlap_dist(
-                    a = data_nom.iloc[i],
-                    b = data_nom.iloc[j],
-                    d = feat_count_nom
-                )
+
+    if feat_count_num == 0:
+        dist_matrix = euclidean_distances(data_num.values)
+
+    else:
+
+        for i in tqdm(range(n), ascii = True, desc = "dist_matrix"):
+            for j in range(n):
+
+                ## utilize heom distance given that
+                ## data contains both numeric / continuous
+                ## and nominal / categorical
+                if feat_count_nom > 0 and feat_count_num > 0:
+                    dist_matrix[i][j] = heom_dist(
+
+                        ## numeric inputs
+                        a_num = data_num.iloc[i],
+                        b_num = data_num.iloc[j],
+                        d_num = feat_count_num,
+                        ranges_num = feat_ranges_num,
+
+                        ## nominal inputs
+                        a_nom = data_nom.iloc[i],
+                        b_nom = data_nom.iloc[j],
+                        d_nom = feat_count_nom
+                    )
+
+                ## utilize hamming distance given that
+                ## data is all nominal / categorical
+                if feat_count_num == 0:
+                    dist_matrix[i][j] = overlap_dist(
+                        a = data_nom.iloc[i],
+                        b = data_nom.iloc[j],
+                        d = feat_count_nom
+                    )
     
     ## determine indicies of k nearest neighbors
     ## and convert knn index list to matrix
